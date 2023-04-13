@@ -1,4 +1,4 @@
-
+from flask_sqlalchemy import SQLAlchemy
 from datetime import datetime, timedelta, timezone
 from hashlib import md5
 from app import app, db, login
@@ -90,3 +90,38 @@ class Post(db.Model):
 
     def __repr__(self) -> str:
         return f'<Post {self.body}>'
+
+# /------------------------------------------------------------------------------------------------/#
+
+
+
+class Company(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    username = db.Column(db.String(64), index=True, unique=True)
+    email = db.Column(db.String(120), index=True, unique=True)
+    password_hash = db.Column(db.String(128))
+    publishes = db.relationship('Job', backref='employer', lazy='dynamic')
+
+
+class Location(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    location = db.Column(db.String(50))
+
+class JobCategories(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    category = db.Column(db.String(50))
+
+class Job(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    company_id = db.Column(db.Integer, db.ForeignKey('company.id'))
+    category_id = db.Column(db.Integer, db.ForeignKey('category.id'))
+    location_id = db.Column(db.Integer, db.ForeignKey('location.id'))
+
+    title = db.Column(db.String(50), index=True, nullable=False)
+    description = db.Column(db.Text, nullable=False)
+    requirement = db.Column(db.Text, nullable=False)
+    salary = db.Column(db.Integer, nullable=True)
+
+    created_at = db.Column(db.DateTime, index=True, default=datetime.utcnow)
+    updated_at = db.Column(db.DateTime, index=True, default=datetime.utcnow)
+    available = db.Column(db.Boolean)
