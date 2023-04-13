@@ -9,15 +9,21 @@
     {% endif %}
 </head>
 <body>
+    <div>
+        <a href="{{ url_for('index') }}">Home</a>
+        <a href="{{ url_for('login') }}">Login</a>
+        <a></a>
 
-    <section>
-        <nav>
-            <ul>
-                <li><a>Home</a></li>
-                <li><a>Job Search</a></li>
-                <li><a>Profile</a></li>
-                <li><a>Career advice</a></li>
-            </ul>
+    </div>
+    <hr>
+{#    <section>#}
+{#        <nav>#}
+{#            <ul>#}
+{#                <li><a>Home</a></li>#}
+{#                <li><a>Job Search</a></li>#}
+{#                <li><a>Profile</a></li>#}
+{#                <li><a>Career advice</a></li>#}
+{#            </ul>#}
 {#            <ul class="nav navbar-nav navbar-right">#}
 {#                {% if current_user.is_anonymous %}#}
 {#                    <li>#}
@@ -32,12 +38,12 @@
 {#                    </li>#}
 {#                {% endif %}#}
 {#            </ul>#}
-        </nav>
-    <hr>
+{#        </nav>#}
+{#    <hr>#}
+{##}
+{#    </section>#}
 
-    </section>
-
-
-
+    {% block content %} {% endblock %}
 </body>
+
 </html>
