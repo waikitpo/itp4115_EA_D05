@@ -1,9 +1,9 @@
 {% extends 'bootstrap/base.html' %}
 {% block title %}
     {% if title %}
-        {{ title }} - Microblog
+        {{ title }} - JobsBD
     {% else %}
-        Welcome to Microblog
+        Welcome to JobsBD
     {% endif %}
 {% endblock %}
 {% block navbar %}
@@ -20,12 +20,12 @@
                     <span class="icon-bar"></span>
                     <span class="icon-bar"></span>
                 </button>
-                <a class="navbar-brand" href="{{ url_for('index') }}">Microblog</a>
+                <a class="navbar-brand" href="{{ url_for('index') }}">JobsBD</a>
             </div>
             <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
                 <ul class="nav navbar-nav">
                     <li>
-                        <a href="{{ url_for('index') }}">Home</a>
+                        <a href="{{ url_for('index') }}">Job search</a>
                     </li>
                     <li>
                         <a href="{{ url_for('explore') }}">Explore</a>
