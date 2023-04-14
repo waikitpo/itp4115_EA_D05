@@ -95,13 +95,16 @@ class Post(db.Model):
 
 
 
-class Company(db.Model):
+class Company(UserMixin, db.Model):
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(64), index=True, unique=True)
     name = db.Column(db.String(128), index=True, unique=True)
     email = db.Column(db.String(120), index=True, unique=True)
     password_hash = db.Column(db.String(128))
     publishes = db.relationship('Job', backref='employer', lazy='dynamic')
+
+    def __repr__(self) -> str:
+        return f'<User {self.username}>'
 
     def set_password(self, password):
         self.password_hash = generate_password_hash(password)
@@ -128,15 +131,25 @@ class Location(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     location = db.Column(db.String(50))
 
-class JobCategories(db.Model):
+class Category(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     category = db.Column(db.String(50))
+
+job_location = db.Table(
+    'job_location',
+    db.Column('job_id', db.Integer, db.ForeignKey('job.id')),
+    db.Column('location_id',db.Integer, db.ForeignKey('location.id'))
+)
+
+job_category = db.Table(
+    'job_category',
+    db.Column('job_id', db.Integer, db.ForeignKey('job.id')),
+    db.Column('category_id',db.Integer, db.ForeignKey('category.id'))
+)
 
 class Job(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     company_id = db.Column(db.Integer, db.ForeignKey('company.id'))
-    category_id = db.Column(db.Integer, db.ForeignKey('category.id'))
-    location_id = db.Column(db.Integer, db.ForeignKey('location.id'))
 
     title = db.Column(db.String(50), index=True, nullable=False)
     description = db.Column(db.Text, nullable=False)
