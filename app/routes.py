@@ -5,8 +5,8 @@ from werkzeug.urls import url_parse
 
 from app import app, db
 from app.email import send_password_reset_email
-from app.forms import LoginForm, RegistrationForm, EditProfileForm, PostForm, ResetPasswordRequestForm, ResetPasswordForm
-from app.models import User, Post
+from app.forms import LoginForm, RegistrationForm, EditProfileForm, PostForm, ResetPasswordRequestForm, ResetPasswordForm, CompanyLoginForm, CompanyRegistrationForm
+from app.models import User, Post,Company,Location,JobCategories,Job
 
 
 @app.before_request
@@ -101,8 +101,12 @@ def reset_password_request():
     form = ResetPasswordRequestForm()
     if form.validate_on_submit():
         user = User.query.filter_by(email=form.email.data).first()
+        company = Company.query.filter_by(email=form.email.data).first()
+
         if user:
             send_password_reset_email(user)
+        elif company:
+            send_password_reset_email(company)
         flash('Check your email for the instructions to reset password.')
         return redirect(url_for('login'))
     return render_template('reset_password_request.html.j2', title="Reset Password", form=form)
@@ -113,14 +117,20 @@ def reset_password(token):
     if current_user.is_authenticated:
         return redirect(url_for('index'))
     user = User.verify_reset_password_token(token)
-    if user is None:
+    company = Company.verify_reset_password_token(token)
+
+    if user and company is None:
         return redirect(url_for('index'))
+    
     form = ResetPasswordForm()
     if form.validate_on_submit():
         user.set_password(form.password.data)
         db.session.commit()
         flash('Your password has been reset.')
-        return redirect(url_for('login'))
+        if user:
+            return redirect(url_for('login'))
+        elif company:
+            return redirect(url_for('company_login'))
     return render_template('reset_password.html.j2', title="Reset Password", form=form)
 
 
@@ -191,9 +201,9 @@ def company_login():
     if current_user.is_authenticated:
         return redirect(url_for('index'))
 
-    form = LoginForm()
+    form = CompanyLoginForm()
     if form.validate_on_submit():
-        user = User.query.filter_by(username=form.username.data).first()
+        user = Company.query.filter_by(username=form.username.data).first()
         if user is None or not user.check_password(form.password.data):
             flash('Invalid username or password!')
             return redirect(url_for('login'))
@@ -210,12 +220,12 @@ def company_login():
 def company_register():
     if current_user.is_authenticated:
         return redirect(url_for('index'))
-    form = RegistrationForm()
+    form = CompanyRegistrationForm()
     if form.validate_on_submit():
-        user = User(username=form.username.data, email=form.email.data)
+        user = Company(username=form.username.data, email=form.email.data, name=form.name.data)
         user.set_password(form.password.data)
         db.session.add(user)
         db.session.commit()
-        flash('Congraduations, you are now a registered Company!')
+        flash('Congraduations, you are now a registered Employers!')
         return redirect(url_for('company_login'))
     return render_template('company_register.html.j2', title="Register for Employer", form=form)

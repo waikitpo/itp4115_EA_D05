@@ -1,7 +1,7 @@
 from flask_wtf import FlaskForm
 from wtforms import StringField, PasswordField, BooleanField, SubmitField, TextAreaField
 from wtforms.validators import DataRequired, Email, EqualTo, ValidationError, Length
-from app.models import User
+from app.models import User, Company
 
 
 class LoginForm(FlaskForm):
@@ -62,3 +62,34 @@ class PostForm(FlaskForm):
     post = TextAreaField("Say Somethong", validators=[
                          DataRequired(), Length(min=0, max=140)])
     submit = SubmitField("Submit")
+
+
+class CompanyLoginForm(FlaskForm):
+    username = StringField("Username", validators=[DataRequired()])
+    password = PasswordField("Password", validators=[DataRequired()])
+    remember_me = BooleanField("Remember Me")
+    submit = SubmitField("Sign In")
+
+class CompanyRegistrationForm(FlaskForm):
+    username = StringField("Username", validators=[DataRequired()])
+    email = StringField("Email", validators=[DataRequired(), Email()])
+    name = StringField("Company Name", validators=[DataRequired()])
+    password = PasswordField("Password", validators=[DataRequired()])
+    password2 = PasswordField("Repeat Password", validators=[
+                              DataRequired(), EqualTo('password')])
+    submit = SubmitField("Register")
+
+    def validate_company_username(self, username):
+        company = Company.query.filter_by(username=username.data).first()
+        if company is not None:
+            raise ValidationError("Please use different username.")
+
+    def validate_company_email(self, email):
+        company = Company.query.filter_by(email=email.data).first()
+        if company is not None:
+            raise ValidationError("Please use different email address.")
+        
+    def validate_company_name(self, name):
+        company = Company.query.filter_by(name=name.data).first()
+        if company is not None:
+            raise ValidationError("Please use different Company Name.")
