@@ -1,36 +1,8 @@
 {% extends "base.html.j2" %}
-
+{% import 'bootstrap/wtf.html' as wtf %}
 {% block app_content %}
-    <h1>Register For Employers</h1>
-
-    <form action="" method="post"></form>
-
-    <p>
-        <label for="">Username</label>
-        <input type="text" name="" id="">
-    </p>
-
-    <p>
-        <label>Email Address</label>
-        <input type="email" name="" id="">
-    </p>
-
-    <p>
-        <label for="">Company Name</label>
-        <input type="text" name="" id="">
-    </p>
-
-    <p>
-        <label>Password</label>
-        <input type="password" name="" id="">
-    </p>
-    <p>
-        <label>Reapeat Password</label>
-        <input type="password" name="" id="">
-    </p>
-
-    <p>
-        <input type="submit" value="Register">
-    </p>
-
+    <h1>Register for Employers</h1>
+    <div class="row">
+        <div class="col-md-4">{{ wtf.quick_form(form) }}</div>
+    </div>
 {% endblock %}

@@ -62,7 +62,9 @@ class User(UserMixin, db.Model):
         own = Post.query.filter_by(user_id=self.id)
         return followed.union(own).order_by(Post.timestamp.desc())
 
-    def get_reset_password_token(self, expires_in=600):
+    def get_reset_password_token(self, expires_in=600, is_company=True):
+        if not is_company:
+            raise ValueError("Incorrect class type")
         return jwt.encode({"reset_password": self.id,
                            "exp": datetime.now(tz=timezone.utc) + timedelta(seconds=expires_in)},
                           app.config["SECRET_KEY"], algorithm="HS256")
@@ -113,7 +115,7 @@ class Company(UserMixin, db.Model):
         return check_password_hash(self.password_hash, password)
 
     def get_reset_password_token(self, expires_in=600):
-        return jwt.encode({"reset_password": self.id,
+        return jwt.encode({"company_reset_password": self.id,
                            "exp": datetime.now(tz=timezone.utc) + timedelta(seconds=expires_in)},
                           app.config["SECRET_KEY"], algorithm="HS256")
 
@@ -121,7 +123,7 @@ class Company(UserMixin, db.Model):
     def verify_reset_password_token(token):
         try:
             id = jwt.decode(token, app.config["SECRET_KEY"], algorithms="HS256")[
-                "reset_password"]
+                "company_reset_password"]
         except:           
             return None
         return Company.query.get(id)

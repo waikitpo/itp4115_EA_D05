@@ -1,7 +1,8 @@
 from datetime import datetime
-from flask import render_template, redirect, flash, url_for, request
+from flask import render_template, redirect, flash, url_for, request, g
 from flask_login import login_required, current_user, login_user, logout_user
 from werkzeug.urls import url_parse
+
 
 from app import app, db
 from app.email import send_password_reset_email
@@ -103,13 +104,18 @@ def reset_password_request():
     if form.validate_on_submit():
         user = User.query.filter_by(email=form.email.data).first()
         company = Company.query.filter_by(email=form.email.data).first()
-
         if user:
             send_password_reset_email(user)
+            flash('Check your email for the instructions to reset password.')
+            return redirect(url_for('login'))
+            
         elif company:
             send_password_reset_email(company)
-        flash('Check your email for the instructions to reset password.')
-        return redirect(url_for('login'))
+            flash('Check your email for the instructions to reset password.')
+            return redirect(url_for('login'))
+        else:
+            flash('User 404 Not Found')
+
     return render_template('reset_password_request.html.j2', title="Reset Password", form=form)
 
 
@@ -120,19 +126,59 @@ def reset_password(token):
     user = User.verify_reset_password_token(token)
     company = Company.verify_reset_password_token(token)
 
+    # if user and company:
+    #     flash('Invalid token')
+    #     return redirect(url_for('index'))
+
+    # if not user and not company:
+    #     flash('Invalid token')
+    #     return redirect(url_for('index'))
+
     if user and company is None:
+        flash('Invalid token')
         return redirect(url_for('index'))
-    
+
     form = ResetPasswordForm()
     if form.validate_on_submit():
-        user.set_password(form.password.data)
-        db.session.commit()
-        flash('Your password has been reset.')
         if user:
+            user.set_password(form.password.data)
+            db.session.commit()
+            flash('Your password has been reset.')
             return redirect(url_for('login'))
+        
         elif company:
+            company.set_password(form.password.data)
+            db.session.commit()
+            flash('Your password has been reset.')
             return redirect(url_for('company_login'))
+        
     return render_template('reset_password.html.j2', title="Reset Password", form=form)
+
+
+
+    # if user and company is None:
+    #     return redirect(url_for('index'))
+    
+    # form = ResetPasswordForm()
+    # if user and form.validate_on_submit():
+    #     user.set_password(form.password.data)
+    #     db.session.commit()
+    #     flash('Your password has been reset.')
+
+    # elif company and form.validate_on_submit():
+    #     company.set_password(form.password.data)
+    #     db.session.commit()
+    #     flash('Your password has been reset.')
+
+    # if form.validate_on_submit():
+    #     user.set_password(form.password.data)
+    #     db.session.commit()
+    #     flash('Your password has been reset.')
+    #     if user:
+    #         return redirect(url_for('login'))
+    #     elif company:
+    #         return redirect(url_for('company_login'))
+    # return render_template('reset_password.html.j2', title="Reset Password", form=form)
 
 
 @app.route('/user/<username>')
