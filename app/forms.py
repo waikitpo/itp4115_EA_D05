@@ -1,5 +1,5 @@
 from flask_wtf import FlaskForm
-from wtforms import StringField, PasswordField, BooleanField, SubmitField, TextAreaField
+from wtforms import StringField, PasswordField, BooleanField, SubmitField, TextAreaField, SelectField, SearchField
 from wtforms.validators import DataRequired, Email, EqualTo, ValidationError, Length
 from app.models import User, Company
 
@@ -93,3 +93,19 @@ class CompanyRegistrationForm(FlaskForm):
         company = Company.query.filter_by(name=name.data).first()
         if company is not None:
             raise ValidationError("Please use different Company Name.")
+        
+class JobSearchForm(FlaskForm):
+    search = SearchField("Job title, keyword or company")
+    job_location = SelectField('Location', choices=[('', 'All Locations'), ('Hong Kong Island', 'Hong Kong Island'), ('Kowloon Peninsula', 'Kowloon Peninsula'), ('New Territory', 'New Territory'), ('Oversea', 'Oversea')])
+    job_category = SelectField('Category', choices=[('', 'All Job Categories'), ('Information Technology', 'Information Technology'), ('Engineering', 'Engineering'), ('Education','Education'),('Management', 'Management'),('Finance', 'Finance') ,('Healthcare', 'Healthcare'),('Transportation', 'Transportation')])
+    submit = SubmitField("Search")
+
+class JobForm(FlaskForm):
+    title = StringField('Job Title')
+    description = TextAreaField('Job Description')
+    requirement = TextAreaField('Job Requirement')
+    salary = StringField('Job Salary')
+    available = BooleanField('still available?')
+
+    location = SelectField('Location', choices=[('', 'All Locations'), ('Hong Kong Island', 'Hong Kong Island'), ('Kowloon Peninsula', 'Kowloon Peninsula'), ('New Territory', 'New Territory'), ('Oversea', 'Oversea')])
+    category = SelectField('Category', choices=[('', 'All Job Categories'), ('Information Technology', 'Information Technology'), ('Engineering', 'Engineering'), ('Education','Education'),('Management', 'Management'),('Finance', 'Finance') ,('Healthcare', 'Healthcare'),('Transportation', 'Transportation')])

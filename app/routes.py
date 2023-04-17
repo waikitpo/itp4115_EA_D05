@@ -6,7 +6,7 @@ from werkzeug.urls import url_parse
 
 from app import app, db
 from app.email import send_password_reset_email
-from app.forms import LoginForm, RegistrationForm, EditProfileForm, PostForm, ResetPasswordRequestForm, ResetPasswordForm, CompanyLoginForm, CompanyRegistrationForm
+from app.forms import LoginForm, RegistrationForm, EditProfileForm, PostForm, ResetPasswordRequestForm, ResetPasswordForm, CompanyLoginForm, CompanyRegistrationForm, JobSearchForm, JobForm
 from app.models import User, Post, Company, Job
 # ,Location,JobCategories,Job
 
@@ -276,3 +276,22 @@ def company_register():
         flash('Congraduations, you are now a registered Employers!')
         return redirect(url_for('company_login'))
     return render_template('company_register.html.j2', title="Register for Employer", form=form)
+
+@app.route("/job_search", methods=['GET', 'POST'])
+def job_search():
+    form = JobSearchForm()
+    # jobs = Job.query
+    # if form.validate_on_submit():
+    #     #get data from submitted form
+    #     jobs.search = form.search.data
+    #     #query the data base
+    #     jobs = jobs.filter(Job.title.like('%' + jobs.search + '%'))
+    #     jobs = jobs.order_by(Job.title).all()
+    # not finish yet
+    return render_template('job_search.html.j2', title="Job Search", form=form)
+
+@app.route("/job_publish", methods=['GET', 'POST'])
+def job_publish():
+    form = JobForm()
+    # 
+    return render_template('job_publish.html.j2', title="Job Publish", form=form)
