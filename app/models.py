@@ -128,6 +128,9 @@ class Company(UserMixin, db.Model):
             return None
         return Company.query.get(id)
 
+@login.user_loader
+def load_company(id):
+    return Company.query.get(int(id))
 
 class Location(db.Model):
     id = db.Column(db.Integer, primary_key=True)

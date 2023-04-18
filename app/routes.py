@@ -23,23 +23,29 @@ def before_request():
 @login_required
 def index():
     form = PostForm()
-    if form.validate_on_submit():
-        post = Post(body=form.post.data, author=current_user)
-        db.session.add(post)
-        db.session.commit()
-        flash('Your post is live!')
-        return redirect(url_for('index'))
+    user = User.query.filter_by(username=current_user.username).first()
+    company = Company.query.filter_by(username=current_user.username).first()
 
-    page = request.args.get("page", 1, type=int)
-    posts = current_user.followed_posts().paginate(
-        page=page, per_page=app.config["POSTS_PER_PAGE"], error_out=False)
-    next_url = url_for(
-        'index', page=posts.next_num) if posts.next_num else None
-    prev_url = url_for(
-        'index', page=posts.prev_num) if posts.prev_num else None
-    return render_template("index.html.j2", title="Home", form=form,
-                           posts=posts.items, next_url=next_url, prev_url=prev_url)
+    if user:
+        if form.validate_on_submit():
+            post = Post(body=form.post.data, author=current_user)
+            db.session.add(post)
+            db.session.commit()
+            flash('Your post is live!')
+            return redirect(url_for('index'))
 
+        page = request.args.get("page", 1, type=int)
+        posts = current_user.followed_posts().paginate(
+            page=page, per_page=app.config["POSTS_PER_PAGE"], error_out=False)
+        next_url = url_for(
+            'index', page=posts.next_num) if posts.next_num else None
+        prev_url = url_for(
+            'index', page=posts.prev_num) if posts.prev_num else None
+        return render_template("index.html.j2", title="Home", form=form,
+                            posts=posts.items, next_url=next_url, prev_url=prev_url)
+
+    elif company:
+        return redirect(url_for('job_publish'))
 
 @app.route('/explore')
 @login_required
@@ -62,6 +68,7 @@ def login():
     form = LoginForm()
     if form.validate_on_submit():
         user = User.query.filter_by(username=form.username.data).first()
+
         if user is None or not user.check_password(form.password.data):
             flash('Invalid username or password!')
             return redirect(url_for('login'))
@@ -250,12 +257,12 @@ def company_login():
 
     form = CompanyLoginForm()
     if form.validate_on_submit():
-        user = Company.query.filter_by(username=form.username.data).first()
-        if user is None or not user.check_password(form.password.data):
+        company = Company.query.filter_by(username=form.username.data).first()
+        if company is None or not company.check_password(form.password.data):
             flash('Invalid username or password!')
             return redirect(url_for('login'))
 
-        login_user(user, remember=form.remember_me.data)
+        login_user(company, remember=form.remember_me.data)
 
         next_page = request.args.get("next")
         if not next_page or url_parse(next_page).netloc != "":
@@ -291,6 +298,7 @@ def job_search():
     return render_template('job_search.html.j2', title="Job Search", form=form)
 
 @app.route("/job_publish", methods=['GET', 'POST'])
+@login_required
 def job_publish():
     form = JobForm()
     

@@ -53,6 +53,9 @@
 
                     {% elif current_user.__tablename__ == 'company' %}
                         <li>
+                            <a href="{{ url_for('job_publish') }}">Job Post</a>
+                        </li>
+                        <li>
                             <a href="{{ url_for('explore') }}">Employer Profile</a>
                         </li>
                         <li>
