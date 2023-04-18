@@ -303,10 +303,26 @@ def job_publish():
     form = JobForm()
     
     if form.validate_on_submit():
-        job = Job(title=form.title.data, description=form.description.data, requirement=form.requirement.data, salary=form.salary.data, job_location=form.location.data, job_category=form.category.data, available=form.available.data)
+        publisher = current_user.id
+        job = Job(title=form.title.data, description=form.description.data, requirement=form.requirement.data, salary=form.salary.data, location_id=form.location.data, category_id=form.category.data, available=form.available.data, company_id=publisher)
 
+        # Clear the data
+        form.title.data = ''
+        form.description.data = ''
+        form.requirement.data = ''
+        form.salary.data = ''
+        form.location.data = '' 
+        form.category.data = ''
+        
         db.session.add(job)
         db.session.commit()
 
         flash("Job Posted")
     return render_template('job_publish.html.j2', title="Job Publish", form=form)
+
+@app.route("/jobs")
+def jobs():
+    #grab all the job form database
+    jobs = Job.query.order_by(Job.created_at)
+
+    return render_template("jobs.html.j2", jobs=jobs)
