@@ -293,5 +293,12 @@ def job_search():
 @app.route("/job_publish", methods=['GET', 'POST'])
 def job_publish():
     form = JobForm()
-    # 
+    
+    if form.validate_on_submit():
+        job = Job(title=form.title.data, description=form.description.data, requirement=form.requirement.data, salary=form.salary.data, job_location=form.location.data, job_category=form.category.data, available=form.available.data)
+
+        db.session.add(job)
+        db.session.commit()
+
+        flash("Job Posted")
     return render_template('job_publish.html.j2', title="Job Publish", form=form)

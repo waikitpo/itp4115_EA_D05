@@ -109,3 +109,4 @@ class JobForm(FlaskForm):
 
     location = SelectField('Location', choices=[('', 'All Locations'), ('Hong Kong Island', 'Hong Kong Island'), ('Kowloon Peninsula', 'Kowloon Peninsula'), ('New Territory', 'New Territory'), ('Oversea', 'Oversea')])
     category = SelectField('Category', choices=[('', 'All Job Categories'), ('Information Technology', 'Information Technology'), ('Engineering', 'Engineering'), ('Education','Education'),('Management', 'Management'),('Finance', 'Finance') ,('Healthcare', 'Healthcare'),('Transportation', 'Transportation')])
+    submit = SubmitField("Submit")
