@@ -8,6 +8,7 @@ from flask_login import UserMixin
 
 from werkzeug.security import generate_password_hash, check_password_hash
 
+from flask import session
 
 followers = db.Table(
     'followers',
@@ -68,6 +69,12 @@ class User(UserMixin, db.Model):
         return jwt.encode({"reset_password": self.id,
                            "exp": datetime.now(tz=timezone.utc) + timedelta(seconds=expires_in)},
                           app.config["SECRET_KEY"], algorithm="HS256")
+    
+    # ------------------------------------------------------------------------------------------------------------
+    def get_id(self):
+        return 'user.' + str(self.id)
+
+
 
     @staticmethod
     def verify_reset_password_token(token):
@@ -79,9 +86,9 @@ class User(UserMixin, db.Model):
         return User.query.get(id)
 
 
-@login.user_loader
-def load_user(id):
-    return User.query.get(int(id))
+# @login.user_loader
+# def load_user(id):
+#     return User.query.get(int(id))
 
 
 class Post(db.Model):
@@ -95,6 +102,31 @@ class Post(db.Model):
 
 # /------------------------------------------------------------------------------------------------/#
 
+@login.user_loader
+def load_user(user_id):
+    temp = user_id.split('.')
+    type = session.get('type')
+    try:
+        uid = temp[1]
+        if temp[0] == 'user' or type == 'user':
+            return User.query.get(uid)
+        elif temp[0] == 'company' or type == 'company':
+            return Company.query.get(uid)
+        else:
+            return None
+    except IndexError:
+        return None
+
+# @login.user_loader
+# def load_user(id):
+#     type = session.get('type')
+#     if type == 'user':
+#         user = User.query.get(int(id))
+#     elif type == 'company':
+#         user = Company.query.get(int(id))
+#     else:
+#         user = None
+#     return user
 
 
 class Company(UserMixin, db.Model):
@@ -119,6 +151,9 @@ class Company(UserMixin, db.Model):
                            "exp": datetime.now(tz=timezone.utc) + timedelta(seconds=expires_in)},
                           app.config["SECRET_KEY"], algorithm="HS256")
 
+    def get_id(self):
+        return 'company.' + str(self.id)
+
     @staticmethod
     def verify_reset_password_token(token):
         try:
@@ -127,10 +162,7 @@ class Company(UserMixin, db.Model):
         except:           
             return None
         return Company.query.get(id)
-
-@login.user_loader
-def load_company(id):
-    return Company.query.get(int(id))
+    
 
 class Location(db.Model):
     id = db.Column(db.Integer, primary_key=True)

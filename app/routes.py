@@ -1,5 +1,5 @@
 from datetime import datetime
-from flask import render_template, redirect, flash, url_for, request, g
+from flask import render_template, redirect, flash, url_for, request, session
 from flask_login import login_required, current_user, login_user, logout_user
 from werkzeug.urls import url_parse
 
@@ -8,8 +8,8 @@ from app import app, db
 from app.email import send_password_reset_email
 from app.forms import LoginForm, RegistrationForm, EditProfileForm, PostForm, ResetPasswordRequestForm, ResetPasswordForm, CompanyLoginForm, CompanyRegistrationForm, JobSearchForm, JobForm
 from app.models import User, Post, Company, Job
-# ,Location,JobCategories,Job
 
+from app.decorators import user_permission_required, company_permission_required
 
 @app.before_request
 def before_request():
@@ -21,35 +21,31 @@ def before_request():
 @app.route("/", methods=['GET', 'POST'])
 @app.route("/index", methods=['GET', 'POST'])
 @login_required
+@user_permission_required
 def index():
     form = PostForm()
-    user = User.query.filter_by(username=current_user.username).first()
-    company = Company.query.filter_by(username=current_user.username).first()
+    if form.validate_on_submit():
+        post = Post(body=form.post.data, author=current_user)
+        db.session.add(post)
+        db.session.commit()
+        flash('Your post is live!')
+        return redirect(url_for('index'))
 
-    if user:
-        if form.validate_on_submit():
-            post = Post(body=form.post.data, author=current_user)
-            db.session.add(post)
-            db.session.commit()
-            flash('Your post is live!')
-            return redirect(url_for('index'))
+    page = request.args.get("page", 1, type=int)
+    posts = current_user.followed_posts().paginate(
+        page=page, per_page=app.config["POSTS_PER_PAGE"], error_out=False)
+    next_url = url_for(
+        'index', page=posts.next_num) if posts.next_num else None
+    prev_url = url_for(
+        'index', page=posts.prev_num) if posts.prev_num else None
+    return render_template("index.html.j2", title="Home", form=form,
+                        posts=posts.items, next_url=next_url, prev_url=prev_url)
 
-        page = request.args.get("page", 1, type=int)
-        posts = current_user.followed_posts().paginate(
-            page=page, per_page=app.config["POSTS_PER_PAGE"], error_out=False)
-        next_url = url_for(
-            'index', page=posts.next_num) if posts.next_num else None
-        prev_url = url_for(
-            'index', page=posts.prev_num) if posts.prev_num else None
-        return render_template("index.html.j2", title="Home", form=form,
-                            posts=posts.items, next_url=next_url, prev_url=prev_url)
-
-    elif company:
-        return redirect(url_for('job_publish'))
 
 @app.route('/explore')
 @login_required
 def explore():
+
     page = request.args.get("page", 1, type=int)
     posts = Post.query.order_by(Post.timestamp.desc()).paginate(
         page=page, per_page=app.config["POSTS_PER_PAGE"], error_out=False)
@@ -58,7 +54,7 @@ def explore():
     prev_url = url_for(
         'explore', page=posts.prev_num) if posts.prev_num else None
     return render_template("index.html.j2", title="Explore", posts=posts.items, next_url=next_url, prev_url=prev_url)
-
+    
 
 @app.route("/login", methods=['GET', 'POST'])
 def login():
@@ -74,6 +70,8 @@ def login():
             return redirect(url_for('login'))
 
         login_user(user, remember=form.remember_me.data)
+        session.permanent = True
+        session['type'] = 'user'
 
         next_page = request.args.get("next")
         if not next_page or url_parse(next_page).netloc != "":
@@ -263,6 +261,8 @@ def company_login():
             return redirect(url_for('login'))
 
         login_user(company, remember=form.remember_me.data)
+        session.permanent = True
+        session['type'] = 'company'
 
         next_page = request.args.get("next")
         if not next_page or url_parse(next_page).netloc != "":
