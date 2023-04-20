@@ -7,7 +7,7 @@ from werkzeug.urls import url_parse
 from app import app, db
 from app.email import send_password_reset_email
 from app.forms import LoginForm, RegistrationForm, EditProfileForm, PostForm, ResetPasswordRequestForm, ResetPasswordForm, CompanyLoginForm, CompanyRegistrationForm, JobSearchForm, JobForm
-from app.models import User, Post, Company, Job
+from app.models import User, Post, Company, Job, Location, Category
 
 from app.decorators import user_permission_required, company_permission_required
 
@@ -287,15 +287,39 @@ def company_register():
 @app.route("/job_search", methods=['GET', 'POST'])
 def job_search():
     form = JobSearchForm()
-    # jobs = Job.query
-    # if form.validate_on_submit():
-    #     #get data from submitted form
-    #     jobs.search = form.search.data
-    #     #query the data base
-    #     jobs = jobs.filter(Job.title.like('%' + jobs.search + '%'))
-    #     jobs = jobs.order_by(Job.title).all()
-    # not finish yet
-    return render_template('job_search.html.j2', title="Job Search", form=form)
+    jobs = []
+    if form.validate_on_submit():
+
+        search = form.search.data
+        job_location = form.job_location.data
+        job_category = form.job_category.data
+
+        sql = f"SELECT * FROM job WHERE title ILIKE '%%{search}%%' "
+
+        if job_location and job_location!='All':
+            sql += f" AND location_id = {job_location}"
+        if job_category and job_category!='All':
+            sql += f" AND category_id = {job_category}" 
+        if job_location == 'All' or job_category=='All':
+            pass
+        result = db.engine.execute(sql)
+        jobs = [dict(row) for row in result]
+
+        # query = db.session.query(Job).filter(Job.title.like(f'%{search}%'))
+        # if job_location:
+        #     location_id = Job.query.filter_by(location_id=job_location).first().id
+        #     query = query.filter_by(location_id=location_id)
+        # if job_category:
+        #     category_id = Job.query.filter_by(category_id=job_category).first().id
+        #     query = query.filter_by(category_id=category_id)
+        # if job_location and job_category:
+        #     query = query.filter(
+        #         Job.location_id == location_id,
+        #         Job.category_id == category_id
+        #     )
+        # jobs = query.all()
+
+    return render_template('job_search.html.j2', title="Job Search", form=form, jobs=jobs)
 
 @app.route("/job_publish", methods=['GET', 'POST'])
 @login_required

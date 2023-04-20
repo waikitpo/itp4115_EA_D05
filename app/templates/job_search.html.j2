@@ -7,6 +7,18 @@
     <div class="col-md-4">{{ wtf.quick_form(form) }}</div>
 </div>
 
+<br/>
+
+{% if jobs %}
+    <ul>
+    {% for job in jobs %}
+        <li>{{ job.title }}</li>
+    {% endfor %}
+    </ul>
+{% else %}
+    <p>No results found.</p>
+{% endif %}
+
 {% endblock %}
 
 {# not finish yet #}

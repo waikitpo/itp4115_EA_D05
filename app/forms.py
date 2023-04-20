@@ -96,8 +96,10 @@ class CompanyRegistrationForm(FlaskForm):
         
 class JobSearchForm(FlaskForm):
     search = SearchField("Job title, keyword or company")
-    job_location = SelectField('Location', choices=[('', 'All Locations'), ('Hong Kong Island', 'Hong Kong Island'), ('Kowloon Peninsula', 'Kowloon Peninsula'), ('New Territory', 'New Territory'), ('Oversea', 'Oversea')])
-    job_category = SelectField('Category', choices=[('', 'All Job Categories'), ('Information Technology', 'Information Technology'), ('Engineering', 'Engineering'), ('Education','Education'),('Management', 'Management'),('Finance', 'Finance') ,('Healthcare', 'Healthcare'),('Transportation', 'Transportation')])
+    job_location = SelectField('Location', choices=[('All', 'All Locations'), ('1', 'Hong Kong Island'), ('2', 'Kowloon Peninsula'), ('3', 'New Territory'), ('4', 'Oversea')])
+    job_category = SelectField('Category', choices=[('All', 'All Job Categories'), ('1', 'Information Technology'), ('2', 'Engineering'), ('3','Education'),('4', 'Management'),('5', 'Finance') ,('6', 'Healthcare'),('7', 'Transportation')])
+    # job_location = SelectField('Location', choices=[('', 'All Locations'), ('Hong Kong Island', 'Hong Kong Island'), ('Kowloon Peninsula', 'Kowloon Peninsula'), ('New Territory', 'New Territory'), ('Oversea', 'Oversea')])
+    # job_category = SelectField('Category', choices=[('', 'All Job Categories'), ('Information Technology', 'Information Technology'), ('Engineering', 'Engineering'), ('Education','Education'),('Management', 'Management'),('Finance', 'Finance') ,('Healthcare', 'Healthcare'),('Transportation', 'Transportation')])
     submit = SubmitField("Search")
 
 class JobForm(FlaskForm):
@@ -107,6 +109,6 @@ class JobForm(FlaskForm):
     salary = StringField('Job Salary')
     available = BooleanField('still available?')
 
-    location = SelectField('Location', choices=[('', 'All Locations'), ('1', 'Hong Kong Island'), ('2', 'Kowloon Peninsula'), ('3', 'New Territory'), ('4', 'Oversea')])
-    category = SelectField('Category', choices=[('', 'All Job Categories'), ('1', 'Information Technology'), ('2', 'Engineering'), ('3','Education'),('4', 'Management'),('5', 'Finance') ,('6', 'Healthcare'),('7', 'Transportation')])
+    location = SelectField('Location', choices=[('1', 'Hong Kong Island'), ('2', 'Kowloon Peninsula'), ('3', 'New Territory'), ('4', 'Oversea')])
+    category = SelectField('Category', choices=[('1', 'Information Technology'), ('2', 'Engineering'), ('3','Education'),('4', 'Management'),('5', 'Finance') ,('6', 'Healthcare'),('7', 'Transportation')])
     submit = SubmitField("Submit")
