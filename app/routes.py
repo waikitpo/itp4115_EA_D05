@@ -294,16 +294,34 @@ def job_search():
         job_location = form.job_location.data
         job_category = form.job_category.data
 
-        sql = f"SELECT * FROM job WHERE title ILIKE '%%{search}%%' "
+        query = Job.query.join(Company).filter(
+            (Job.title.ilike(f'%{search}%')) | (Company.name.ilike(f'%{search}%'))
+        )
 
-        if job_location and job_location!='All':
-            sql += f" AND location_id = {job_location}"
-        if job_category and job_category!='All':
-            sql += f" AND category_id = {job_category}" 
-        if job_location == 'All' or job_category=='All':
-            pass
-        result = db.engine.execute(sql)
-        jobs = [dict(row) for row in result]
+        if job_location and job_location != 'All':
+            query = query.filter(Job.location_id == job_location)
+
+        if job_category and job_category != 'All':
+            query = query.filter(Job.category_id == job_category)
+
+        jobs = query.all()
+
+
+        # sql = f"SELECT * FROM job JOIN company ON (job.company_id = company.id) WHERE job.title ILIKE '%%{search}%%' or company.name ILIKE '%%{search}%%' "
+
+        # sql = f"SELECT * FROM job WHERE title ILIKE '%%{search}%%' "
+
+        # if job_location and job_location!='All':
+        #     sql += f" AND location_id = {job_location}"
+
+        # if job_category and job_category!='All':
+        #     sql += f" AND category_id = {job_category}" 
+
+        # if job_location == 'All' or job_category=='All':
+        #     pass
+        
+        # result = db.engine.execute(sql)
+        # jobs = [dict(row) for row in result]
 
         # query = db.session.query(Job).filter(Job.title.like(f'%{search}%'))
         # if job_location:

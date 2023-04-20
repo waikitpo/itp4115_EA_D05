@@ -8,16 +8,45 @@
 </div>
 
 <br/>
+<br/>
+<br/>
+<br/>
+<br/>
 
-{% if jobs %}
-    <ul>
-    {% for job in jobs %}
-        <li>{{ job.title }}</li>
-    {% endfor %}
-    </ul>
-{% else %}
-    <p>No results found.</p>
-{% endif %}
+<div class="row">
+    <div class="col-md-12">
+        {% if jobs %}
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th>Title</th>
+                        <th>Company</th>
+                        <th>Location</th>
+                        <th>Salary</th>
+                        <th>Still available?</th>
+                        <th>Updated at</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for job in jobs %}
+                        <tr>
+                            <td>{{ job.title }}</td>
+                            <td>{{ job.company_id }}</td>
+                            <td>{{ job.location_id }}</td>
+                            <td>{{ job.salary }} HKD</td>
+                            <td>{{ job.available }}</td>
+                            <td>{{ job.updated_at }}</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        {% else %}
+            <p>No results found.</p>
+        {% endif %}
+    </div>
+</div>
+
+
 
 {% endblock %}
 
