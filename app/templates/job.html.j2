@@ -2,26 +2,12 @@
 
 {% block app_content %}
 
-{# 
-<h1>Job results</h1>
-<br/>
-
-{% for job in jobs %}
-    {{ job.title }}<br/>
-    {{ job.publisher.name }}<br/>
-    {{ job.location_id }}<br/>
-    {{ job.category_id }}<br/>
-    {{ job.description }}<br/>
-    {{ job.salary }}<br/><br/>
-
-
-{% endfor %} #}
 <div class="container">
     <h1 class="text-center">Job results</h1>
     <br/>
 
     <div class="row">
-        {% for job in jobs %}
+
             <div class="col-md-12">
                 <div class="panel panel-default">
                     <div class="panel-body">
@@ -32,14 +18,11 @@
                         <p><strong>Description:</strong></p>
                         <p>{{ job.description }}</p>
                         <p><strong>Salary:</strong> {{ job.salary }}</p>
-                        <p><strong>Status Available?:</strong> {{ job.available }}</p>
-
-                        <a href="{{ url_for('job', id=job.id )}}">View Job</a>
-                        <a href="{{ url_for('edit_job', id=job.id )}}">Edit Job</a>
+                        <a href="{{ url_for( 'jobs' )}}">Back to My Jobs</a>
                     </div>
                 </div>
             </div>
-        {% endfor %}
+
     </div>
 
 </div>

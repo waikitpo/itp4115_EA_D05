@@ -392,3 +392,37 @@ def edit_company():
         form.name.data = current_user.name
         form.email.data = current_user.email
     return render_template('edit_company.html.j2', title="Edit Profile", form=form)
+
+
+
+@app.route('/jobs/<int:id>')
+def job(id):
+    job = Job.query.get_or_404(id)
+    return render_template('job.html.j2', job=job)
+
+
+
+@app.route('/jobs/edit/<int:id>', methods=['GET', 'POST'])
+def edit_job(id):
+    job = Job.query.get_or_404(id)
+    form = JobForm()
+    if form.validate_on_submit():
+        job.title = form.title.data
+        job.description = form.description.data
+        job.requirement = form.requirement.data
+        job.salary = form.salary.data
+        job.location = form.location.data
+        job.category = form.category.data
+        # Update Database
+        db.session.add(job)
+        db.session.commit()
+        flash("Job Has Been Updated!")
+        return redirect(url_for('job', id=job.id))
+    
+    form.title.data = job.title
+    form.description.data = job.description
+    form.requirement.data = job.requirement
+    form.salary.data = job.salary
+    form.location.data = job.location
+    form.category.data = job.category
+    return render_template('edit_job.html.j2', form=form)
