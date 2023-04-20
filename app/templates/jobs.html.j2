@@ -2,7 +2,7 @@
 
 {% block app_content %}
 
-
+{# 
 <h1>Job results</h1>
 <br/>
 
@@ -15,7 +15,30 @@
     {{ job.salary }}<br/><br/>
 
 
-{% endfor %}
+{% endfor %} #}
+<div class="container">
+    <h1 class="text-center">Job results</h1>
+    <br/>
+
+    <div class="row">
+        {% for job in jobs %}
+            <div class="col-md-12">
+                <div class="panel panel-default">
+                    <div class="panel-body">
+                        <h3>{{ job.title }}</h3>
+                        <p><strong>Publisher:</strong> {{ job.publisher.name }}</p>
+                        <p><strong>Location:</strong> {{ job.location_id }}</p>
+                        <p><strong>Category:</strong> {{ job.category_id }}</p>
+                        <p><strong>Description:</strong></p>
+                        <p>{{ job.description }}</p>
+                        <p><strong>Salary:</strong> {{ job.salary }}</p>
+                    </div>
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+
+</div>
 
 
 

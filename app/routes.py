@@ -6,7 +6,7 @@ from werkzeug.urls import url_parse
 
 from app import app, db
 from app.email import send_password_reset_email
-from app.forms import LoginForm, RegistrationForm, EditProfileForm, PostForm, ResetPasswordRequestForm, ResetPasswordForm, CompanyLoginForm, CompanyRegistrationForm, JobSearchForm, JobForm
+from app.forms import LoginForm, RegistrationForm, EditProfileForm, PostForm, ResetPasswordRequestForm, ResetPasswordForm, CompanyLoginForm, CompanyRegistrationForm, JobSearchForm, JobForm,CompanyEditForm
 from app.models import User, Post, Company, Job, Location, Category
 
 from app.decorators import user_permission_required, company_permission_required
@@ -368,3 +368,27 @@ def jobs():
     jobs = Job.query.order_by(Job.created_at)
 
     return render_template("jobs.html.j2", jobs=jobs)
+
+@app.route('/company/<username>')
+def company(username):
+    user = Company.query.filter_by(username=username).first_or_404()
+    
+    return render_template('company.html.j2', user=user)
+
+@app.route('/edit_company', methods=['GET', 'POST'])
+@login_required
+def edit_company():
+    form = CompanyEditForm(current_user.username)
+    if form.validate_on_submit():
+        current_user.username = form.username.data
+        current_user.name = form.name.data
+        current_user.email = form.email.data
+
+        db.session.commit()
+        flash("Your change have been saved.")
+        return redirect(url_for('edit_company'))
+    elif request.method == "GET":
+        form.username.data = current_user.username
+        form.name.data = current_user.name
+        form.email.data = current_user.email
+    return render_template('edit_company.html.j2', title="Edit Profile", form=form)
