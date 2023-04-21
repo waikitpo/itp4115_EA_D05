@@ -2,7 +2,7 @@ from datetime import datetime
 from flask import render_template, redirect, flash, url_for, request, session
 from flask_login import login_required, current_user, login_user, logout_user
 from werkzeug.urls import url_parse
-
+from sqlalchemy.orm import contains_eager
 
 from app import app, db
 from app.email import send_password_reset_email
@@ -21,7 +21,7 @@ def before_request():
 @app.route("/", methods=['GET', 'POST'])
 @app.route("/index", methods=['GET', 'POST'])
 @login_required
-@user_permission_required
+# @user_permission_required
 def index():
     form = PostForm()
     if form.validate_on_submit():
@@ -38,6 +38,7 @@ def index():
         'index', page=posts.next_num) if posts.next_num else None
     prev_url = url_for(
         'index', page=posts.prev_num) if posts.prev_num else None
+    
     return render_template("index.html.j2", title="Home", form=form,
                         posts=posts.items, next_url=next_url, prev_url=prev_url)
 
@@ -288,6 +289,8 @@ def company_register():
 def job_search():
     form = JobSearchForm()
     jobs = []
+    search_c = request.args.get('search')
+    
     if form.validate_on_submit():
 
         search = form.search.data
@@ -303,9 +306,14 @@ def job_search():
 
         if job_category and job_category != 'All':
             query = query.filter(Job.category_id == job_category)
-
+        
         jobs = query.all()
 
+    elif search_c is not None:
+        search_c = request.args.get('search')
+        query = Job.query.join(Company).filter(Company.name == search_c)
+
+        jobs = query.all()
 
         # sql = f"SELECT * FROM job JOIN company ON (job.company_id = company.id) WHERE job.title ILIKE '%%{search}%%' or company.name ILIKE '%%{search}%%' "
 
@@ -365,9 +373,13 @@ def job_publish():
 @app.route("/jobs")
 def jobs():
     #grab all the job form database
-    jobs = Job.query.order_by(Job.created_at)
+    jobs = Job.query.filter_by(company_id=current_user.id).order_by(Job.created_at)
 
     return render_template("jobs.html.j2", jobs=jobs)
+
+
+
+
 
 @app.route('/company/<username>')
 def company(username):

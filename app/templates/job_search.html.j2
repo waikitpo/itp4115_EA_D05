@@ -30,9 +30,9 @@
                 <tbody>
                     {% for job in jobs %}
                         <tr>
-                            <td>{{ job.title }}</td>
-                            <td>{{ job.company_id }}</td>
-                            <td>{{ job.location_id }}</td>
+                            <td><a href="{{ url_for('job', id=job.id )}}">{{ job.title }}</a></td>
+                            <td><a href="{{ url_for('job_search', search=job.publisher.name)}}">{{ job.publisher.name }}</a></td>
+                            <td>{{ job.location.location }}</td>
                             <td>{{ job.salary }} HKD</td>
                             <td>{{ job.available }}</td>
                             <td>{{ job.updated_at }}</td>

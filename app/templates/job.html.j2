@@ -13,12 +13,30 @@
                     <div class="panel-body">
                         <h3>{{ job.title }}</h3>
                         <p><strong>Publisher:</strong> {{ job.publisher.name }}</p>
-                        <p><strong>Location:</strong> {{ job.location_id }}</p>
-                        <p><strong>Category:</strong> {{ job.category_id }}</p>
+                        <p><strong>Location:</strong> {{ job.location.location }}</p>
+                        <p><strong>Category:</strong> {{ job.category.category }}</p>
                         <p><strong>Description:</strong></p>
                         <p>{{ job.description }}</p>
                         <p><strong>Salary:</strong> {{ job.salary }}</p>
+                        <p><strong>Status Available?:</strong> {{ job.available }}</p>
+
+
+                        {% if current_user.is_anonymous or current_user.__tablename__ == 'user'%}
+            
+                        <a href="{{ url_for( 'job_search' )}}">Back to Job Search</a>
+                        <a href="{{ url_for('job_search' )}}">Apply for jobs</a>
+
+                        {% elif current_user.__tablename__ == 'company' and job.publisher.id == current_user.id %}
+
                         <a href="{{ url_for( 'jobs' )}}">Back to My Jobs</a>
+                        <a href="{{ url_for('edit_job', id=job.id )}}">Edit Job</a>
+
+                        {% else %}
+
+                        <a href="{{ url_for( 'job_search' )}}">Back to Job Search</a>
+
+                        {% endif %}
+
                     </div>
                 </div>
             </div>
