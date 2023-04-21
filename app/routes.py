@@ -290,7 +290,7 @@ def job_search():
     form = JobSearchForm()
     jobs = []
     search_c = request.args.get('search')
-    
+
     if form.validate_on_submit():
 
         search = form.search.data
@@ -438,3 +438,22 @@ def edit_job(id):
     form.location.data = job.location
     form.category.data = job.category
     return render_template('edit_job.html.j2', form=form)
+
+@app.route('/jobs/delete/<int:id>')
+def delete_job(id):
+    job_to_delete = Job.query.get_or_404(id)
+
+    try:
+        db.session.delete(job_to_delete)
+        db.session.commit()
+
+        flash("Job Was Deleted!")
+
+        jobs = Job.query.filter_by(company_id=current_user.id).order_by(Job.created_at)
+        return render_template("jobs.html.j2", jobs=jobs)
+    
+    except:
+        flash("Oops! There was a problem deleting job, try again...")
+
+        jobs = Job.query.filter_by(company_id=current_user.id).order_by(Job.created_at)
+        return render_template("jobs.html.j2", jobs=jobs)
