@@ -22,13 +22,14 @@
 
 
                         <a href="{{ url_for('application', id=application.id )}}">View Application</a>
-                        {# <a href="{{ url_for('edit_application', id=job.id )}}">Edit Application</a>
-                        <a href="{{ url_for('delete_application', id=job.id )}}">Delete Application</a> #}
+                        <a href="{{ url_for('application_edit', id=application.id )}}">Edit</a>
+                        <a href="{{ url_for('application_delete', id=application.id )}}">Withdraw</a>
 
                         {% elif current_user.__tablename__ == 'company' %}
-                        <h3>{{ application.name }}</h3>
+                        <h3>Applicant: {{ application.name }}</h3>
                         <h3>{{ application.job.title }}</h3>
 
+                        <p><strong>JOB ID:</strong> {{ application.job_id }}</p>
                         <p><strong>Contact Number:</strong> {{ application.contact_number }}</p>
                         <p><strong>Contact Email:</strong> {{ application.contact_email }}</p>
                         <p><strong>Resume:</strong> {{ application.resume }}</p>
@@ -37,6 +38,7 @@
                         <p><strong>Application Status:</strong> {{ application.status }}</p>
 
                         <a href="{{ url_for('application', id=application.id )}}">View Application</a>
+                        <a href="{{ url_for('application_reply', id=application.id )}}">Edit</a>
                         
                         {% endif %}
                     </div>

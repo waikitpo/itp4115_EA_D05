@@ -1,0 +1,12 @@
+{% extends "base.html.j2" %}
+{% import 'bootstrap/wtf.html' as wtf %}
+{% block app_content %}
+
+<h1>Application Edit</h1>
+<div class="row">
+    <div class="col-md-4">{{ wtf.quick_form(form) }}</div>
+</div>
+<br/>
+<a href="{{ url_for('applications')}}">Back to My Applications</a>
+
+{% endblock %}

@@ -465,6 +465,12 @@ def delete_job(id):
 def apply_job(id):
     form = JobApplyForm()
     job = Job.query.get_or_404(id)
+
+    duplication_check = JobApplication.query.filter_by(job_id=id, user_id=current_user.id).first()
+    if duplication_check:
+        flash('You can not apply twice!')
+        return redirect(url_for('job_search'))
+    
     if form.validate_on_submit():
         user = current_user.id
         job_apply = JobApplication(
@@ -507,6 +513,72 @@ def applications():
 
 
 @app.route('/applications/<int:id>')
+@login_required
 def application(id):
     application = JobApplication.query.get_or_404(id)
     return render_template('application.html.j2', application=application)
+
+
+@app.route('/applications/edit/<int:id>', methods=['GET', 'POST'])
+@login_required
+def application_edit(id):
+    application = JobApplication.query.get_or_404(id)
+    form = JobApplyForm()
+    if form.validate_on_submit():
+        application.name = form.name.data
+        application.contact_number = form.contact_number.data
+        application.contact_email = form.contact_email.data
+        application.resume = form.resume.data
+        application.message = form.message.data
+        # Update Database
+        db.session.add(application)
+        db.session.commit()
+        flash("Application Has Been Updated!")
+        return redirect(url_for('application', id=application.id))
+    
+    form.name.data = application.name
+    form.contact_number.data = application.contact_number
+    form.contact_email.data = application.contact_email
+    form.resume.data = application.resume
+    form.message.data = application.message
+    
+    return render_template('application_edit.html.j2', form=form)
+
+@app.route('/applications/reply/<int:id>', methods=['GET', 'POST'])
+@login_required
+def application_reply(id):
+    application = JobApplication.query.get_or_404(id)
+    form = JobReplyForm()
+    if form.validate_on_submit():
+        application.reply = form.reply.data
+        application.status = form.status.data
+
+        db.session.add(application)
+        db.session.commit()
+
+        flash("Application Has Been Updated!")
+        return redirect(url_for('application', id=application.id))
+
+    form.reply.data = application.reply
+    form.status.data = application.status
+
+    return render_template('application_edit.html.j2', form=form)
+
+@app.route('/applications/delete/<int:id>')
+def application_delete(id):
+    application_to_delete = JobApplication.query.get_or_404(id)
+
+    try:
+        db.session.delete(application_to_delete)
+        db.session.commit()
+
+        flash("Application Was Deleted!")
+
+        applications = JobApplication.query.filter_by(user_id=current_user.id).order_by(JobApplication.created_at)
+        return render_template("applications.html.j2", applications=applications)
+    
+    except:
+        flash("Oops! There was a problem deleting application, try again...")
+
+        applications = JobApplication.query.filter_by(user_id=current_user.id).order_by(JobApplication.created_at)
+        return render_template("applications.html.j2", applications=applications)

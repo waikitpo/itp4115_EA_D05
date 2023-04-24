@@ -140,6 +140,6 @@ class JobApplyForm(FlaskForm):
     submit = SubmitField("Submit")
 
 class JobReplyForm(FlaskForm):
-    reply = StringField("Your Reply", validators=[DataRequired()])
-    status = SelectField('Change Status', choices=[('Submited', 'Submited'), ('Reviewed', 'Reviewed'), ('Interview', 'Interview'), ('Offered', 'Offered'), ('Rejected', 'Rejected')])
+    reply = TextAreaField("Your Reply", validators=[DataRequired()])
+    status = SelectField('Change Status', choices=[('Submitted', 'Submitted'), ('Reviewed', 'Reviewed'), ('Interview', 'Interview'), ('Offered', 'Offered'), ('Rejected', 'Rejected')])
     submit = SubmitField("Edit")
