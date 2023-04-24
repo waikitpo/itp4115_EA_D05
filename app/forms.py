@@ -129,3 +129,5 @@ class CompanyEditForm(FlaskForm):
             company = Company.query.filter_by(username=username.data).first()
             if company is not None:
                 raise ValidationError("Please use different username.")
+            
+    

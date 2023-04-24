@@ -259,7 +259,7 @@ def company_login():
         company = Company.query.filter_by(username=form.username.data).first()
         if company is None or not company.check_password(form.password.data):
             flash('Invalid username or password!')
-            return redirect(url_for('login'))
+            return redirect(url_for('company_login'))
 
         login_user(company, remember=form.remember_me.data)
         session.permanent = True
