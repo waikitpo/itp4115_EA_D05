@@ -1,0 +1,50 @@
+{% extends "base.html.j2" %}
+
+{% block app_content %}
+
+<div class="container">
+    <h1 class="text-center">Application results</h1>
+    <br/>
+
+    <div class="row">
+
+            <div class="col-md-12">
+                <div class="panel panel-default">
+                    <div class="panel-body">
+                        <h3>{{ application.name }}</h3>
+                        <h3>{{ application.job.title }}</h3>
+                        <p><strong>Contact Number:</strong> {{ application.contact_number }}</p>
+                        <p><strong>Contact Email:</strong> {{ application.contact_email }}</p>
+                        <p><strong>Resume:</strong> {{ application.resume }}</p>
+                        <br>
+                        <p><strong>Applicant Message:</strong> {{ application.message }}</p>
+                        <p><strong>Company Reply:</strong> {{ application.reply }}</p>
+                        <br>
+                        <p><strong>Application Status:</strong> {{ application.status }}</p>
+
+
+                        {% if current_user.__tablename__ == 'user'%}
+            
+                        {# <a href="{{ url_for( 'job_search' )}}">Back to My Application</a>
+                        <a href="{{ url_for('apply_job', id=job.id )}}">Edit Application</a>
+                        <a href="{{ url_for('delete_job', id=job.id )}}">Withdraw Application</a> #}
+
+                        {% elif current_user.__tablename__ == 'company' and application.company.id == current_user.id %}
+
+                        {# <a href="{{ url_for( 'jobs' )}}">Back to All Applications</a>
+                        <a href="{{ url_for('edit_job', id=job.id )}}">Edit Application</a> #}
+
+                        {% endif %}
+
+                    </div>
+                </div>
+            </div>
+
+    </div>
+
+</div>
+
+
+
+
+{% endblock %}

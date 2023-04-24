@@ -6,8 +6,8 @@ from sqlalchemy.orm import contains_eager
 
 from app import app, db
 from app.email import send_password_reset_email
-from app.forms import LoginForm, RegistrationForm, EditProfileForm, PostForm, ResetPasswordRequestForm, ResetPasswordForm, CompanyLoginForm, CompanyRegistrationForm, JobSearchForm, JobForm,CompanyEditForm
-from app.models import User, Post, Company, Job, Location, Category
+from app.forms import LoginForm, RegistrationForm, EditProfileForm, PostForm, ResetPasswordRequestForm, ResetPasswordForm, CompanyLoginForm, CompanyRegistrationForm, JobSearchForm, JobForm,CompanyEditForm, JobApplyForm, JobReplyForm
+from app.models import User, Post, Company, Job, Location, Category, JobApplication, JobApplicationStatus
 
 from app.decorators import user_permission_required, company_permission_required
 
@@ -457,3 +457,56 @@ def delete_job(id):
 
         jobs = Job.query.filter_by(company_id=current_user.id).order_by(Job.created_at)
         return render_template("jobs.html.j2", jobs=jobs)
+
+
+
+@app.route("/jobs//job_apply/<int:id>", methods=['GET', 'POST'])
+@login_required
+def apply_job(id):
+    form = JobApplyForm()
+    job = Job.query.get_or_404(id)
+    if form.validate_on_submit():
+        user = current_user.id
+        job_apply = JobApplication(
+            name=form.name.data, 
+            contact_number=form.contact_number.data, 
+            contact_email=form.contact_email.data, 
+            resume=form.resume.data, 
+            message=form.message.data, 
+            status='Submitted',
+            job_id=id,
+            company_id=job.publisher.id,
+            user_id=user)
+
+        # Clear the data
+        form.name.data = ''
+        form.contact_number.data = ''
+        form.contact_email.data = ''
+        form.resume.data = ''
+        form.message.data = ''
+        
+        db.session.add(job_apply)
+        db.session.commit()
+
+        flash("Job Application Submitted")
+        return redirect(url_for('job_search'))
+    return render_template('job_apply.html.j2', title="Job Apply", form=form)
+
+
+@app.route("/applications")
+@login_required
+def applications():
+
+    type = session.get('type')
+    if type == 'user':
+        applications = JobApplication.query.filter_by(user_id=current_user.id).order_by(JobApplication.created_at).all()
+    elif type == 'company':
+        applications = JobApplication.query.filter_by(company_id=current_user.id).order_by(JobApplication.created_at).all()
+
+    return render_template("applications.html.j2", applications=applications)
+
+
+@app.route('/applications/<int:id>')
+def application(id):
+    application = JobApplication.query.get_or_404(id)
+    return render_template('application.html.j2', application=application)

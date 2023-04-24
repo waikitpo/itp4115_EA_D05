@@ -131,3 +131,15 @@ class CompanyEditForm(FlaskForm):
                 raise ValidationError("Please use different username.")
             
     
+class JobApplyForm(FlaskForm):
+    name = StringField("Your Full Name", validators=[DataRequired()])
+    contact_number = StringField("Phone Number", validators=[DataRequired()])
+    contact_email = StringField("Email to Contact", validators=[DataRequired()])
+    resume = TextAreaField('Your Resume', validators=[DataRequired()])
+    message = TextAreaField('Your Mesaage')
+    submit = SubmitField("Submit")
+
+class JobReplyForm(FlaskForm):
+    reply = StringField("Your Reply", validators=[DataRequired()])
+    status = SelectField('Change Status', choices=[('Submited', 'Submited'), ('Reviewed', 'Reviewed'), ('Interview', 'Interview'), ('Offered', 'Offered'), ('Rejected', 'Rejected')])
+    submit = SubmitField("Edit")
