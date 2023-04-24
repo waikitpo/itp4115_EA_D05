@@ -6,8 +6,8 @@ from sqlalchemy.orm import contains_eager
 
 from app import app, db
 from app.email import send_password_reset_email
-from app.forms import LoginForm, RegistrationForm, EditProfileForm, PostForm, ResetPasswordRequestForm, ResetPasswordForm, CompanyLoginForm, CompanyRegistrationForm, JobSearchForm, JobForm,CompanyEditForm
-from app.models import User, Post, Company, Job, Location, Category
+from app.forms import LoginForm, RegistrationForm, EditProfileForm, PostForm, ResetPasswordRequestForm, ResetPasswordForm, CompanyLoginForm, CompanyRegistrationForm, JobSearchForm, JobForm,CompanyEditForm, JobApplyForm, JobReplyForm
+from app.models import User, Post, Company, Job, Location, Category, JobApplication, JobApplicationStatus
 
 from app.decorators import user_permission_required, company_permission_required
 
@@ -259,7 +259,7 @@ def company_login():
         company = Company.query.filter_by(username=form.username.data).first()
         if company is None or not company.check_password(form.password.data):
             flash('Invalid username or password!')
-            return redirect(url_for('login'))
+            return redirect(url_for('company_login'))
 
         login_user(company, remember=form.remember_me.data)
         session.permanent = True
@@ -457,3 +457,128 @@ def delete_job(id):
 
         jobs = Job.query.filter_by(company_id=current_user.id).order_by(Job.created_at)
         return render_template("jobs.html.j2", jobs=jobs)
+
+
+
+@app.route("/jobs//job_apply/<int:id>", methods=['GET', 'POST'])
+@login_required
+def apply_job(id):
+    form = JobApplyForm()
+    job = Job.query.get_or_404(id)
+
+    duplication_check = JobApplication.query.filter_by(job_id=id, user_id=current_user.id).first()
+    if duplication_check:
+        flash('You can not apply twice!')
+        return redirect(url_for('job_search'))
+    
+    if form.validate_on_submit():
+        user = current_user.id
+        job_apply = JobApplication(
+            name=form.name.data, 
+            contact_number=form.contact_number.data, 
+            contact_email=form.contact_email.data, 
+            resume=form.resume.data, 
+            message=form.message.data, 
+            status='Submitted',
+            job_id=id,
+            company_id=job.publisher.id,
+            user_id=user)
+
+        # Clear the data
+        form.name.data = ''
+        form.contact_number.data = ''
+        form.contact_email.data = ''
+        form.resume.data = ''
+        form.message.data = ''
+        
+        db.session.add(job_apply)
+        db.session.commit()
+
+        flash("Job Application Submitted")
+        return redirect(url_for('job_search'))
+    return render_template('job_apply.html.j2', title="Job Apply", form=form)
+
+
+@app.route("/applications")
+@login_required
+def applications():
+
+    type = session.get('type')
+    if type == 'user':
+        applications = JobApplication.query.filter_by(user_id=current_user.id).order_by(JobApplication.created_at).all()
+    elif type == 'company':
+        applications = JobApplication.query.filter_by(company_id=current_user.id).order_by(JobApplication.created_at).all()
+
+    return render_template("applications.html.j2", applications=applications)
+
+
+@app.route('/applications/<int:id>')
+@login_required
+def application(id):
+    application = JobApplication.query.get_or_404(id)
+    return render_template('application.html.j2', application=application)
+
+
+@app.route('/applications/edit/<int:id>', methods=['GET', 'POST'])
+@login_required
+def application_edit(id):
+    application = JobApplication.query.get_or_404(id)
+    form = JobApplyForm()
+    if form.validate_on_submit():
+        application.name = form.name.data
+        application.contact_number = form.contact_number.data
+        application.contact_email = form.contact_email.data
+        application.resume = form.resume.data
+        application.message = form.message.data
+        # Update Database
+        db.session.add(application)
+        db.session.commit()
+        flash("Application Has Been Updated!")
+        return redirect(url_for('application', id=application.id))
+    
+    form.name.data = application.name
+    form.contact_number.data = application.contact_number
+    form.contact_email.data = application.contact_email
+    form.resume.data = application.resume
+    form.message.data = application.message
+    
+    return render_template('application_edit.html.j2', form=form)
+
+@app.route('/applications/reply/<int:id>', methods=['GET', 'POST'])
+@login_required
+def application_reply(id):
+    application = JobApplication.query.get_or_404(id)
+    form = JobReplyForm()
+    if form.validate_on_submit():
+        application.reply = form.reply.data
+        application.status = form.status.data
+
+        db.session.add(application)
+        db.session.commit()
+
+        flash("Application Has Been Updated!")
+        return redirect(url_for('application', id=application.id))
+
+    form.reply.data = application.reply
+    form.status.data = application.status
+
+    return render_template('application_edit.html.j2', form=form)
+
+@app.route('/applications/delete/<int:id>')
+def application_delete(id):
+    application_to_delete = JobApplication.query.get_or_404(id)
+
+    try:
+        db.session.delete(application_to_delete)
+        db.session.commit()
+
+        flash("Application Was Deleted!")
+
+        applications = JobApplication.query.filter_by(user_id=current_user.id).order_by(JobApplication.created_at)
+        return render_template("applications.html.j2", applications=applications)
+    
+    except:
+        flash("Oops! There was a problem deleting application, try again...")
+
+        applications = JobApplication.query.filter_by(user_id=current_user.id).order_by(JobApplication.created_at)
+        return render_template("applications.html.j2", applications=applications)

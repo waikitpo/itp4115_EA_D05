@@ -10,6 +10,8 @@ from werkzeug.security import generate_password_hash, check_password_hash
 
 from flask import session
 
+from enum import Enum
+
 followers = db.Table(
     'followers',
     db.Column('follower_id', db.Integer, db.ForeignKey('user.id')),
@@ -30,6 +32,8 @@ class User(UserMixin, db.Model):
         primaryjoin=(followers.c.follower_id == id),
         secondaryjoin=(followers.c.followed_id == id),
         backref=db.backref('followers', lazy='dynamic'), lazy='dynamic')
+    
+    job_application = db.relationship('JobApplication', backref='user', lazy='dynamic')
 
     def __repr__(self) -> str:
         return f'<User {self.username}>'
@@ -163,6 +167,7 @@ class Company(UserMixin, db.Model):
             return None
         return Company.query.get(id)
     
+    job_application = db.relationship('JobApplication', backref='company', lazy='dynamic')
 
 class Location(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -228,10 +233,42 @@ class Job(db.Model):
     # locations = db.relationship('Location', backref='job_in_location')
     # categories = db.relationship('Category', backref='job_in_category')
 
+    job_application = db.relationship('JobApplication', backref='job', lazy='dynamic')
 
 
+class JobApplicationStatus(Enum):
+    submitted = 'Submitted'
+    reviewed = 'Reviewed'
+    interview = 'Interview'
+    offered = 'Offered'
+    rejected = 'Rejected'
 
 
+class JobApplication(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+
+    job_id = db.Column(db.Integer, db.ForeignKey('job.id'))
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
+    company_id = db.Column(db.Integer, db.ForeignKey('company.id'))
+
+    name = db.Column(db.String(128), index=True)
+    contact_number = db.Column(db.Integer, nullable=False)
+    contact_email = db.Column(db.String(120), index=True, nullable=False)
+    resume = db.Column(db.Text, nullable=False)
+
+    message = db.Column(db.Text)
+    reply = db.Column(db.Text)
+
+    # status = db.Column(db.Enum(JobApplicationStatus), nullable=False)
+    status = db.Column(db.String(50), nullable=False, index=True)
+
+    created_at = db.Column(db.DateTime, index=True, default=datetime.utcnow)
+    updated_at = db.Column(db.DateTime, index=True, default=datetime.utcnow)
+
+    # Relationships
+    # job = db.relationship('Job', back_populates='job_application')
+    # user = db.relationship('User', back_populates='job_application')
+    # company = db.relationship('Company', back_populates='job_application')
 
 
 

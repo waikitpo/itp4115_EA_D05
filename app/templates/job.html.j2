@@ -24,7 +24,7 @@
                         {% if current_user.is_anonymous or current_user.__tablename__ == 'user'%}
             
                         <a href="{{ url_for( 'job_search' )}}">Back to Job Search</a>
-                        <a href="{{ url_for('job_search' )}}">Apply for jobs</a>
+                        <a href="{{ url_for('apply_job', id=job.id )}}">Apply for job</a>
 
                         {% elif current_user.__tablename__ == 'company' and job.publisher.id == current_user.id %}
 
